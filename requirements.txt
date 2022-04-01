@@ -1,0 +1,5 @@
+flask-pymongo
+pandas
+python-dotenv
+#pymongo[srv]
+werkzeug
