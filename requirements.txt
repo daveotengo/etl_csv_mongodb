@@ -1,8 +1,13 @@
-flask-pymongo
-pandas
-python-dotenv
-#pymongo[srv]
-werkzeug
+Flask==2.1.1
 
-kanpai
+Flask-PyMongo==2.3.0
+
+pandas==1.4.1
+
+python-dotenv
+
+Werkzeug==2.1.0
+
+kanpai==0.1.15
+
 marshmallow == 3.8.0

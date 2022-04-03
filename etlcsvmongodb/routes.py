@@ -56,15 +56,17 @@ def get_single_data_by_id(id):
 
     try:
         data = get_single_data(id)
-        jsn_data=json.loads(JSONEncoder().encode(data))
         if not jsn_data:
             msg = "Document/Record with id: " + id + " does not exist"
-            status = '01'
+            status = '03'
+
 
     except Exception as e:
         #print(e)
-        msg = "Document/Record with id: "+id+" does not exist"
+        msg = "Something went wrong fetchting Document/Record with id: "+id
         status = '01'
+
+    jsn_data = json.loads(JSONEncoder().encode(data))
 
     response = make_response(
         jsonify(
