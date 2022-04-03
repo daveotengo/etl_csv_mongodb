@@ -130,9 +130,9 @@ def multi_upload():
 
                 file.stream.seek(0)
                 filename = secure_filename(file.filename)
-                # Check if file has already been uploaded
+                # Check if the file is one of the allowed types/extensions
                 if file and allowed_file(file.filename):
-                    # Check if the file is one of the allowed types/extensions
+                    # Check if file has already been uploaded
                     if not get_single_data_by_file_name(filename):
                         print("enter")
                         # Make the filename safe, remove unsupported chars
