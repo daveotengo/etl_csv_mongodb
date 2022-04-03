@@ -3,3 +3,6 @@ pandas
 python-dotenv
 #pymongo[srv]
 werkzeug
+
+kanpai
+marshmallow == 3.8.0

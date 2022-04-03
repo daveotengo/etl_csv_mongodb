@@ -1,4 +1,6 @@
 
+from etlcsvmongodb.settings import MONGO_HOST, MONGO_PORT, MONGO_MAX_POOL_SIZE
+
 try:
     import pymongo
     from pymongo import MongoClient
@@ -15,7 +17,7 @@ class MongoDB(object):
         self.dBName = dBName
         self.collectionName = collectionName
 
-        self.client = MongoClient("localhost", 27017, maxPoolSize=50)
+        self.client = MongoClient(MONGO_HOST, MONGO_PORT, maxPoolSize=MONGO_MAX_POOL_SIZE)
 
         self.DB = self.client[self.dBName]
         self.collection = self.DB[self.collectionName]

@@ -54,6 +54,15 @@ def get_single_data(document_id):
     data = collection.find_one({'_id': ObjectId(document_id)})
     return data
 
+def get_single_data_by_date_and_amt(date_time,amount):
+    """
+    get document data by document ID
+    :param document_id:
+    :return:
+    """
+    data = collection.find_one({'Datetime': date_time,'amount':amount})
+    return data
+
 
 def get_multiple_data():
     """
