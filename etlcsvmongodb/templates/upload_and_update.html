@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Upload and Update Data</title>
+</head>
+<body>
+    <h1>Upload and Update Data</h1>
+    <form action="/api/upload_and_update" method="post" enctype="multipart/form-data">
+        <p>Select a CSV or Excel file to upload. Ensure the file has columns 'sormas_facility' and 'validated_facility'.</p>
+
+        <label for="data">Select a file to upload:</label>
+        <input type="file" name="data" accept=".csv, .xlsx">
+        <br>
+         <br>
+        <input type="submit" value="Upload and Update">
+    </form>
+</body>
+</html>

@@ -1,13 +1,47 @@
-Flask==2.1.1
 
+####
+backports.zoneinfo==0.2.1
+cli-helpers==2.3.0
+click==8.0.4
+colorama==0.4.5
+configobj==5.0.8
+dataclasses==0.8
+et-xmlfile==1.1.0
+Flask==2.0.3
 Flask-PyMongo==2.3.0
-
-pandas==1.4.1
-
-python-dotenv
-
-Werkzeug==2.1.0
-
+greenlet==2.0.2
+humanize==3.14.0
+importlib-metadata==4.8.3
+importlib-resources==5.4.0
+itsdangerous==2.0.1
+Jinja2==3.0.3
 kanpai==0.1.15
+MarkupSafe==2.0.1
+marshmallow==3.8.0
+numpy==1.19.5
+openpyxl==3.1.2
+pandas==1.0.4
+pgcli==2.1.1
+pgspecial==2.1.1
+prompt-toolkit==2.0.10
+psycopg==3.0.18
+psycopg2==2.9.6
+Pygments==2.14.0
+pymongo==4.1.1
+python-dateutil==2.8.2
+python-dotenv==0.19.2
+pytz==2023.3.post1
+setproctitle==1.2.3
+six==1.16.0
+SQLAlchemy==1.4.51
+sqlparse==0.3.1
+tabulate==0.8.10
+typing_extensions==4.1.1
+tzdata==2023.4
+wcwidth==0.2.13
+Werkzeug==2.0.3
+xlrd==2.0.1
+zipp==3.6.0
 
-marshmallow == 3.8.0
+
+#pip install pgcli==2.1.1 --only-binary psycopg2

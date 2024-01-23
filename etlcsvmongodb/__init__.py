@@ -4,7 +4,7 @@ from .routes import main
 from .settings import UPLOADS_PATH, MAX_CONTENT_LENGTH
 def create_app(confing_object='etlcsvmongodb.settings'):
 
-    app = Flask(__name__);
+    app = Flask(__name__)
 
 
     UPLOAD_FOLDER = UPLOADS_PATH
