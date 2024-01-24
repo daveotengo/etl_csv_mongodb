@@ -22,7 +22,8 @@ from etlcsvmongodb.db_collection import get_single_data, insert_multi_data, get_
 from etlcsvmongodb.db_collection_info import insert_data, get_single_data_by_file_name
 from flask import current_app
 
-from etlcsvmongodb.db_sql import update_facility_name, insert_new_facility_record
+from etlcsvmongodb.db_sql import update_facility_name, insert_new_facility_record, insert_new_district_record, \
+    update_district_name, update_sub_district_name, insert_new_sub_district_record
 from etlcsvmongodb.errors import error_response
 from etlcsvmongodb.models import DateTimeAmount, date_time_amount_schema, Facility, Region, District
 from etlcsvmongodb.utils import JSONEncoder, allowed_file
@@ -519,49 +520,29 @@ def upload_and_update_data():
             print(file_path)
 
             # Read file data
-            sheet_name = 'Facility GAPS'  # Replace 'YourSheetName' with the actual sheet name
-            df = pd.read_csv(file_path + filename) if filename.endswith('.csv') else pd.read_excel(file_path + filename,
-                                                                                                   sheet_name=sheet_name,
-                                                                                                   engine='openpyxl')
-            print(df)
-            print("read file name and path")
-            # Extract sormas_facility and validated_facility columns
-            if 'SORMAS Facility' not in df.columns or 'Validated Facility' not in df.columns:
-                return jsonify(
-                    msg="Required columns 'SORMAS Facility' and 'Validated Facility' not found in the file.",
-                    status='04',
-                )
+            # sheet_name = 'Facility GAPS'  # Replace 'YourSheetName' with the actual sheet name
+            # df = pd.read_csv(file_path + filename) if filename.endswith('.csv') else pd.read_excel(file_path + filename,
+            #                                                                                        sheet_name=sheet_name,
+            #                                                                                        engine='openpyxl'
+            # List of sheet names
+            sheet_names = ['District GAPS', 'Sub-district GAPS', 'Facility GAPS']
 
-            # Update database with file data
-            # Iterate over rows in the DataFrame
-            for index, row in df.iterrows():
-                sormas_facility = row['SORMAS Facility']
-                validated_facility = row['Validated Facility']
-                print("printing sormas_facility")
-                print(sormas_facility)
-                if str(sormas_facility).lower() == "nan" or isinstance(sormas_facility, float) and math.isnan(
-                        sormas_facility):
-                    print("entered")
+            # Loop through each sheet name
+            for sheet_name in sheet_names:
+                # Read file data for each sheet
+                df = pd.read_csv(file_path + filename) if filename.endswith('.csv') else pd.read_excel(
+                    file_path + filename,
+                    sheet_name=sheet_name,
+                    engine='openpyxl')
+                print(df)
+                print(f"read file name and path for sheet: {sheet_name}")
 
-                    # Perform the insertion, adjust as needed based on your data model
-                    print("Inserting")
-                    result = insert_new_facility_record(row, validated_facility)
-                    if result:
-                        print(f"Data created successfully for {validated_facility}")
-                    else:
-                        print(f"Error creating data for {sormas_facility}")
-
-                else:
-
-                    print("Updating")
-                    # Update database with file data
-                    # Perform the update, adjust as needed based on your data model
-                    postgresql_updated = update_facility_name(sormas_facility, validated_facility)
-
-                    if postgresql_updated:
-                        print(f"Data updated successfully for {sormas_facility}")
-                    else:
-                        print(f"Error updating data for {sormas_facility}")
+                if sheet_name == 'District GAPS':
+                    process_district_gaps(df)
+                if sheet_name == 'Sub-district GAPS':
+                    process_sub_district_gaps(df)
+                if sheet_name == 'Facility GAPS':
+                    process_facility_gaps(df)
 
             return jsonify(
                 msg="File data updated successfully",
@@ -577,10 +558,135 @@ def upload_and_update_data():
 
     return render_template('upload_and_update.html')
 
+
+def process_facility_gaps(df):
+    print("called process_facility_gaps")
+    # Extract sormas_facility and validated_facility columns
+    if 'SORMAS Facility' not in df.columns or 'Validated Facility' not in df.columns:
+        return jsonify(
+            msg="Required columns 'SORMAS Facility' and 'Validated Facility' not found in the file.",
+            status='04',
+        )
+
+    # Update database with file data
+    # Iterate over rows in the DataFrame
+    for index, row in df.iterrows():
+        sormas_facility = row['SORMAS Facility']
+        validated_facility = row['Validated Facility']
+        print("printing sormas_facility")
+        print(sormas_facility)
+        if str(sormas_facility).lower() == "nan" or isinstance(sormas_facility, float) and math.isnan(
+                sormas_facility):
+            print("entered")
+
+            # Perform the insertion, adjust as needed based on your data model
+            print("Inserting")
+            result = insert_new_facility_record(row, validated_facility)
+            if result:
+                print(f"Data created successfully for {validated_facility}")
+            else:
+                print(f"Error creating data for {sormas_facility}")
+
+        else:
+
+            print("Updating")
+            # Update database with file data
+            # Perform the update, adjust as needed based on your data model
+            postgresql_updated = update_facility_name(sormas_facility, validated_facility)
+
+            if postgresql_updated:
+                print(f"Data updated successfully for {sormas_facility}")
+            else:
+                print(f"Error updating data for {sormas_facility}")
+
+
+def process_district_gaps(df):
+    print("called process_district_gaps")
+
+    # Extract sormas_facility and validated_facility columns
+    if 'SORMAS District' not in df.columns or 'Validated District Name' not in df.columns:
+        return jsonify(
+            msg="Required columns 'SORMAS District' and 'Validated District Name' not found in the file.",
+            status='04',
+        )
+
+    # Update database with file data
+    # Iterate over rows in the DataFrame
+    for index, row in df.iterrows():
+        sormas_district = row['SORMAS District']
+        validated_district = row['Validated District Name']
+        print("printing sormas_facility")
+        print(sormas_district)
+        if str(sormas_district).lower() == "nan" or isinstance(sormas_district, float) and math.isnan(
+                sormas_district):
+            print("entered")
+
+            # Perform the insertion, adjust as needed based on your data model
+            print("Inserting")
+            result = insert_new_district_record(row, validated_district)
+            if result:
+                print(f"Data created successfully for {validated_district}")
+            else:
+                print(f"Error creating data for {sormas_district}")
+
+        else:
+
+            print("Updating")
+            # Update database with file data
+            # Perform the update, adjust as needed based on your data model
+            postgresql_updated = update_district_name(sormas_district, validated_district)
+
+            if postgresql_updated:
+                print(f"Data updated successfully for {sormas_district}")
+            else:
+                print(f"Error updating data for {sormas_district}")
+
+
+def process_sub_district_gaps(df):
+    print("called process_sub_district_gaps")
+
+    # Extract sormas_sub-district and validated_sub-district columns
+    if 'SORMAS Sub-District' not in df.columns or 'Validated Sub-district' not in df.columns:
+        return jsonify(
+            msg="Required columns 'SORMAS Sub-District' and 'Validated Sub-District' not found in the file.",
+            status='04',
+        )
+
+    # Update database with file data
+    # Iterate over rows in the DataFrame
+    for index, row in df.iterrows():
+        sormas_sub_district = row['SORMAS Sub-District']
+        validated_sub_district = row['Validated Sub-district']
+        print("printing sormas_sub-district")
+        print(sormas_sub_district)
+        if str(sormas_sub_district).lower() == "nan" or isinstance(sormas_sub_district, float) and math.isnan(
+                sormas_sub_district):
+            print("entered")
+
+            # Perform the insertion, adjust as needed based on your data model
+            print("Inserting")
+            result = insert_new_sub_district_record(row, validated_sub_district)
+            if result:
+                print(f"Data created successfully for {validated_sub_district}")
+            else:
+                print(f"Error creating data for {sormas_sub_district}")
+
+        else:
+
+            print("Updating")
+            # Update database with file data
+            # Perform the update, adjust as needed based on your data model
+            postgresql_updated = update_sub_district_name(sormas_sub_district, validated_sub_district)
+
+            if postgresql_updated:
+                print(f"Data updated successfully for {sormas_sub_district}")
+            else:
+                print(f"Error updating data for {sormas_sub_district}")
+
 # @main.route('/update_data', methods=['GET', 'POST'])
 # def update_data_route():
 #     if request.method == 'POST':
-#         # Assuming you have a form with sormas_facility and validated_facility fields
+#         # Assuming you have a form with sormas_sub-district and validated_facility fields
 #         sormas_facility = request.form.get('sormas_facility')
 #         validated_facility = request.form.get('validated_facility')
 #

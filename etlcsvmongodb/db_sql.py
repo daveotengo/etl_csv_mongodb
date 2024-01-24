@@ -84,6 +84,100 @@ def insert_new_facility_record(row, validated_facility):
         print(f"Error inserting new facility record: {e}")
         return False
 
+
+def insert_new_district_record(row, validated_district):
+    try:
+        with session_scope() as session:
+
+            region = row["Region"]
+            print(region)
+
+            region_to_insert = session.query(Region).filter_by(name=region).first()
+            print(region_to_insert)
+
+            unique_rand = generate_complex_unique_number()
+
+            existing_district = session.query(District).filter_by(name=validated_district).first()
+            print("==existing_district==")
+            print(existing_district)
+
+            if existing_district:
+                print("District already exists. Skipping insertion.")
+                logging.info("District already exists. Skipping insertion.")
+                return True, "District already exists. Skipping insertion"
+
+            # Insert entire record considering the specific matching field in the table
+            new_district_data = {
+                "id": unique_rand,
+                "additionalinformation": row["SD Code"],
+                "region_id": region_to_insert.id,
+                # "DHIMS Facility": row["DHIMS Facility"],
+                # "SORMAS Facility": validated_facility,
+                # "Comments": row["Comments"],
+                "name": validated_district,
+                # "Comments 2": row["Comments 2"],
+            }
+            new_district = District(**new_district_data)
+            session.add(new_district)
+
+            print("district created")
+
+        return True
+    except Exception as e:
+        print(f"Error inserting new district record: {e}")
+        return False
+
+
+def insert_new_sub_district_record(row, validated_sub_district):
+    try:
+        with session_scope() as session:
+
+            region = row["Region"]
+            print(region)
+            district = row["District"]
+            print(district)
+
+            region_to_insert = session.query(Region).filter_by(name=region).first()
+            print(region_to_insert)
+
+            district_to_insert = session.query(District).filter_by(name=district).first()
+            print(district_to_insert)
+
+            unique_rand = generate_complex_unique_number()
+
+            existing_sub_district = session.query(Facility).filter_by(name=validated_sub_district).first()
+            print("==existing_sub_district==")
+            print(existing_sub_district)
+
+            if existing_sub_district:
+                print("Facility already exists. Skipping insertion.")
+                logging.info("Facility already exists. Skipping insertion.")
+                return True, "Facility already exists. Skipping insertion"
+
+            # Insert entire record considering the specific matching field in the table
+            new_sub_district_data = {
+                "id": unique_rand,
+                "additionalinformation": row["SD Code"],
+                "region_id": region_to_insert.id,
+                "district_id": district_to_insert.id,
+                # "DHIMS Facility": row["DHIMS Facility"],
+                # "SORMAS Facility": validated_sub_district,
+                # "Comments": row["Comments"],
+                "name": validated_sub_district,
+                # "Comments 2": row["Comments 2"],
+                # Add other columns as needed
+            }
+            new_sub_district = Community(**new_sub_district_data)
+            session.add(new_sub_district)
+
+            print("sub_district created")
+
+        return True
+    except Exception as e:
+        print(f"Error inserting new sub_district record: {e}")
+        return False
+
+
 def generate_complex_unique_number():
     current_time = pd.datetime.datetime.utcnow()
     timestamp_part = int(current_time.timestamp()) * 1000000
@@ -137,40 +231,63 @@ def update_facility_name(sormas_facility, validated_facility):
     except Exception as e:
         print(f"Error updating data in PostgreSQL: {e}")
         return False
-# def update_facility_name(sormas_facility, validated_facility):
-#     try:
-#         with session_scope() as session:
-#             # Use SQL expression language for the update
-#             stmt = update(Facility).where(Facility.name == sormas_facility).values(name=validated_facility)
-#             session.execute(stmt)
-#
-#         return True
-#     except Exception as e:
-#         print(f"Error updating data in PostgreSQL: {e}")
-#         return False
-
-# def update_facility_name(sormas_facility, validated_facility):
-#     try:
-#         with session_scope() as session:
-#             # Retrieve the Facility record to update
-#             facility_to_update = session.query(Facility).filter_by(name=sormas_facility).first()
-#
-#             if facility_to_update:
-#                 # Update the name with the validated_facility value
-#                 facility_to_update.name = validated_facility
-#
-#             return True
-#     except Exception as e:
-#         print(f"Error updating data in PostgreSQL: {e}")
-#         return False
 
 
-# def update_facility_name(sormas_facility, validated_facility):
-#     try:
-#         with session_scope() as session:
-#             # Update the corresponding record in the database
-#             session.query(Facility).filter_by(name=sormas_facility).update({"name": validated_facility})
-#         return True
-#     except Exception as e:
-#         print(f"Error updating data in PostgreSQL: {e}")
-#         return False
+def update_district_name(sormas_district, validated_district):
+    print("update_district_name called")
+    try:
+        with session_scope() as session:
+            print("in session scopes")
+            print(sormas_district)
+
+            sormas_district_name = sormas_district
+
+            districts_to_update = session.query(District).filter_by(name=sormas_district_name).all()
+            print(districts_to_update)
+
+            for district_to_update in districts_to_update:
+                print("==district_to_update==")
+
+                print(district_to_update)
+
+                # Update the name field
+                district_to_update.name = validated_district
+
+            # Commit the changes outside the loop
+            session.commit()
+
+            return True
+
+    except Exception as e:
+        print(f"Error updating data in PostgreSQL: {e}")
+        return False
+
+
+def update_sub_district_name(sormas_sub_district, validated_sub_district):
+    print("update_sub_district_name called")
+    try:
+        with session_scope() as session:
+            print("in session scopes")
+            print(sormas_sub_district)
+
+            sormas_sub_district_name = sormas_sub_district
+
+            sub_districts_to_update = session.query(Community).filter_by(name=sormas_sub_district_name).all()
+            print(sub_districts_to_update)
+
+            for sub_district_to_update in sub_districts_to_update:
+                print("==district_to_update==")
+
+                print(sub_district_to_update)
+
+                # Update the name field
+                sub_district_to_update.name = validated_sub_district
+
+                # Commit the changes outside the loop
+            session.commit()
+
+            return True
+
+    except Exception as e:
+        print(f"Error updating data in PostgreSQL: {e}")
+        return False
