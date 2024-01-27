@@ -63,10 +63,10 @@ class Facility(Base):
     # contactpersonemail = Column(String)
     # latitude = Column(Float)
     # longitude = Column(Float)
-    # type = Column(Enum(FacilityType))
+    type = Column(Enum(FacilityType))
     publicownership = Column(Boolean, default=False)
     #externalid = Column(String)
-    uuid = Column(String, default=str(uuid.uuid4()), nullable=False)
+    uuid = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), nullable=False)
 
     region = relationship("Region", back_populates="facilities")
     district = relationship("District", back_populates="facilities")
@@ -156,15 +156,15 @@ class DiseaseConfiguration(Base):
     uuid = Column(String)  # Assuming there is a corresponding UUID field
     disease = Column(Enum(Disease), unique=True)
     active = Column(Boolean)
-    primary_disease = Column(Boolean)
-    case_based = Column(Boolean)
-    follow_up_enabled = Column(Boolean)
-    follow_up_duration = Column(Integer)
-    case_follow_up_duration = Column(Integer)
-    event_participant_follow_up_duration = Column(Integer)
-    extended_classification = Column(Boolean)
-    extended_classification_multi = Column(Boolean)
-    age_groups = Column(String)  # Assuming a serialized string representation
+    primarydisease = Column(Boolean)
+    casebased = Column(Boolean)
+    followupenabled = Column(Boolean)
+    followupduration = Column(Integer)
+    casefollowupduration = Column(Integer)
+    eventparticipantfollowupduration = Column(Integer)
+    extendedclassification = Column(Boolean)
+    extendedclassificationmulti = Column(Boolean)
+    agegroups = Column(String)  # Assuming a serialized string representation
 
     # Assuming you have a Facility class defined
     facilities = relationship("Facility", secondary='facility_diseaseconfiguration')

@@ -16,15 +16,16 @@ from werkzeug.utils import secure_filename
 
 from flask import Blueprint, jsonify, request, render_template
 
-from etlcsvmongodb import app, db_collection
+from etlcsvmongodb import db_collection
 from etlcsvmongodb.db_collection import get_single_data, insert_multi_data, get_multiple_data, \
     get_single_data_by_date_and_amt, remove_data
 from etlcsvmongodb.db_collection_info import insert_data, get_single_data_by_file_name
 from flask import current_app
 
-from etlcsvmongodb.db_sql import update_facility_name, insert_new_facility_record, insert_new_district_record, \
-    update_district_name, update_sub_district_name, insert_new_sub_district_record
+from etlcsvmongodb.service import update_facility_name, insert_new_facility_record, insert_new_district_record, \
+    update_district_name, update_sub_district_name, insert_new_sub_district_record, update_entity, insert_new_entity
 from etlcsvmongodb.errors import error_response
+from etlcsvmongodb.logger_config import logger
 from etlcsvmongodb.models import DateTimeAmount, date_time_amount_schema, Facility, Region, District
 from etlcsvmongodb.utils import JSONEncoder, allowed_file
 from etlcsvmongodb.validator import add_item_param_validation
@@ -67,7 +68,7 @@ def get_single_data_by_id(id):
 
 
     except Exception as e:
-        # print(e)
+        # logger.info(e)
         msg = "Something went wrong fetchting Document/Record with id: " + id
         status = '01'
 
@@ -91,7 +92,7 @@ def get_all_data():
     try:
         data = get_multiple_data()
     except Exception as e:
-        print(e)
+        logger.info(e)
         msg = "Something Went Wrong Fetching Data"
         status = '01'
 
@@ -125,7 +126,7 @@ def multi_upload():
 
         if (len(uploaded_files) > 0):
 
-            print(uploaded_files[0].filename)
+            logger.info(uploaded_files[0].filename)
             filenames = []
             msg = ''
             status = ''
@@ -139,7 +140,7 @@ def multi_upload():
                 if file and allowed_file(file.filename):
                     # Check if file has already been uploaded
                     if not get_single_data_by_file_name(filename):
-                        print("enter")
+                        logger.info("enter")
                         # Make the filename safe, remove unsupported chars
                         # Move the file form the temporal folder to the upload
                         # folder we setup
@@ -152,7 +153,7 @@ def multi_upload():
                         try:
                             insert_multi_data(data)
                         except Exception as e:
-                            print(e)
+                            logger.info(e)
 
                         # Getting filesize
                         size = os.stat(file_path + filename).st_size
@@ -263,30 +264,30 @@ def single_upload():
                     "total_cols": total_cols,
                 }
 
-                print(str(info_data).replace("'", '"'))
+                logger.info(str(info_data).replace("'", '"'))
 
-                print(str(info_data).replace("'", '"'))
+                logger.info(str(info_data).replace("'", '"'))
 
                 x = json.loads(str(info_data).replace("'", '"'), object_hook=lambda d: SimpleNamespace(**d))
-                print(x.file_name, x.file_size, x.files_date)
-                print(x)
-                print(json.loads(str(info_data).replace("'", '"')))
+                logger.info(x.file_name, x.file_size, x.files_date)
+                logger.info(x)
+                logger.info(json.loads(str(info_data).replace("'", '"')))
 
-                print(json.dumps(json.loads(str(info_data).replace("'", '"')), indent=2))
+                logger.info(json.dumps(json.loads(str(info_data).replace("'", '"')), indent=2))
 
                 jsn_info_data = json.loads(str(info_data).replace("'", '"'))
 
-                print(str(data).replace("'", '"'))
+                logger.info(str(data).replace("'", '"'))
 
-                print("\n")
+                logger.info("\n")
 
                 jsnencodedArrayStr = JSONEncoder().encode(data)
 
-                print(jsnencodedArrayStr)
+                logger.info(jsnencodedArrayStr)
 
                 jsnloadsArrayStr = json.loads(jsnencodedArrayStr)
 
-                print("\n")
+                logger.info("\n")
 
                 insert_data(info_data)
 
@@ -341,14 +342,14 @@ def add_item():
 
     # j = json.loads(str(jsn_req).replace("'", '"'))
     # u = DateTimeAmount(**j)
-    # print(u)
+    # logger.info(u)
     #
     # date_time = u.Datetime
     # amount = u.amount
     #
     date_time = jsn_req['Datetime']
     amount = jsn_req['amount']
-    print(jsn_req)
+    logger.info(jsn_req)
 
     if not get_single_data_by_date_and_amt(date_time, amount):
         data = {
@@ -387,9 +388,9 @@ def update_item():
         date_time_amount = date_time_amount_schema.loads(request.data)
     except ValidationError as err:
         return error_response(400, err.messages)
-    print(date_time_amount)
+    logger.info(date_time_amount)
     jsn_req = request.json
-    print(jsn_req)
+    logger.info(jsn_req)
     id = jsn_req['id']
 
     sing_data = get_single_data(id)
@@ -398,8 +399,8 @@ def update_item():
         status = '02'
     else:
 
-        print("printing initial single data")
-        print(sing_data)
+        logger.info("printing initial single data")
+        logger.info(sing_data)
 
         date_time = jsn_req['Datetime']
 
@@ -410,10 +411,10 @@ def update_item():
         if date_time:
             sing_data['Datetime'] = date_time
 
-        print("printing updated single data")
-        print(sing_data)
+        logger.info("printing updated single data")
+        logger.info(sing_data)
 
-        print(jsn_req)
+        logger.info(jsn_req)
         msg = "Successfully Updated Record/Document"
         status = '00'
 
@@ -472,7 +473,7 @@ def delete_data_by_id(id):
             data = remove_data(id)
             jsn_data = json.loads(JSONEncoder().encode(data))
         except Exception as e:
-            # print(e)
+            # logger.info(e)
             msg = "Sorry Something went wrong when deleting Document/Record with id: " + id
             status = '01'
 
@@ -498,26 +499,26 @@ def allowed_file(filename):
 def upload_and_update_data():
     if request.method == 'POST':
         try:
-            print("entered")
+            logger.info("Endpoint : /api/upload_and_update Hit ")
             # File upload handling
             file = request.files['data']
 
             # Validate file type
             if not allowed_file(file.filename):
-                print("not allowed")
+                logger.info("not allowed")
 
                 return jsonify(
                     msg="Invalid file type. Please upload a CSV or Excel file.",
                     status='02',
                 )
 
-            print("allowed")
+            logger.info("file allowed")
             file_path = current_app.config['UPLOAD_FOLDER']
             filename = secure_filename(file.filename)
             file.save(os.path.join(file_path, filename))
-            print("setting file name")
-            print(filename)
-            print(file_path)
+            logger.info("setting file name")
+            logger.info(filename)
+            logger.info(file_path)
 
             # Read file data
             # sheet_name = 'Facility GAPS'  # Replace 'YourSheetName' with the actual sheet name
@@ -534,8 +535,8 @@ def upload_and_update_data():
                     file_path + filename,
                     sheet_name=sheet_name,
                     engine='openpyxl')
-                print(df)
-                print(f"read file name and path for sheet: {sheet_name}")
+                logger.info(df)
+                logger.info(f"read file name and path for sheet: {sheet_name}")
 
                 if sheet_name == 'District GAPS':
                     process_district_gaps(df)
@@ -543,6 +544,7 @@ def upload_and_update_data():
                     process_sub_district_gaps(df)
                 if sheet_name == 'Facility GAPS':
                     process_facility_gaps(df)
+                # process_all_gaps(df, sheet_name.split(" ")[0])
 
             return jsonify(
                 msg="File data updated successfully",
@@ -559,8 +561,47 @@ def upload_and_update_data():
     return render_template('upload_and_update.html')
 
 
+def process_all_gaps(df, entity_str):
+    logger.info(f"****called process_all_gaps {entity_str} ****")
+    # Extract sormas_facility and validated_facility columns
+    if f'SORMAS {entity_str}' not in df.columns or f'Validated {entity_str}' not in df.columns:
+        return jsonify(
+            msg=f"Required columns f'SORMAS {entity_str}' and 'Validated {entity_str}' not found in the file.",
+            status='04',
+        )
+
+    # Update database with file data
+    # Iterate over rows in the DataFrame
+    entity_str_lower = entity_str.lower()
+
+    for index, row in df.iterrows():
+        sormas_entity_exl_row_val = row[f'SORMAS {entity_str}']
+        validated_entity_exl_row_val = row[f'Validated {entity_str}']
+        logger.info(f"printing {sormas_entity_exl_row_val}")
+        logger.info(sormas_entity_exl_row_val)
+        if str(sormas_entity_exl_row_val).lower() == "nan" or isinstance(sormas_entity_exl_row_val,
+                                                                         float) and math.isnan(
+            sormas_entity_exl_row_val):
+            logger.info("entered")
+
+            # Perform the insertion, adjust as needed based on your data model
+            logger.info("Inserting")
+            result = insert_new_entity(row, entity_str)
+            logger.info(f"Processed {validated_entity_exl_row_val} result: {result}")
+
+        else:
+
+            logger.info("Updating")
+            # Update database with file data
+            # Perform the update, adjust as needed based on your data model
+            postgresql_updated = update_entity(row, entity_str)
+
+            logger.info(f"Processed {sormas_entity_exl_row_val} with "
+                        f"{validated_entity_exl_row_val} result: {postgresql_updated}")
+
+
 def process_facility_gaps(df):
-    print("called process_facility_gaps")
+    logger.info("****called process_facility_gaps****")
     # Extract sormas_facility and validated_facility columns
     if 'SORMAS Facility' not in df.columns or 'Validated Facility' not in df.columns:
         return jsonify(
@@ -573,35 +614,28 @@ def process_facility_gaps(df):
     for index, row in df.iterrows():
         sormas_facility = row['SORMAS Facility']
         validated_facility = row['Validated Facility']
-        print("printing sormas_facility")
-        print(sormas_facility)
+        logger.info("printing sormas_facility")
+        logger.info(sormas_facility)
         if str(sormas_facility).lower() == "nan" or isinstance(sormas_facility, float) and math.isnan(
                 sormas_facility):
-            print("entered")
+            logger.info("entered")
 
             # Perform the insertion, adjust as needed based on your data model
-            print("Inserting")
+            logger.info("Inserting")
             result = insert_new_facility_record(row, validated_facility)
-            if result:
-                print(f"Data created successfully for {validated_facility}")
-            else:
-                print(f"Error creating data for {sormas_facility}")
 
+            logger.info(f"Processed {validated_facility} result: {result}")
         else:
-
-            print("Updating")
+            logger.info("Updating")
             # Update database with file data
             # Perform the update, adjust as needed based on your data model
-            postgresql_updated = update_facility_name(sormas_facility, validated_facility)
+            postgresql_updated = update_facility_name(row)
 
-            if postgresql_updated:
-                print(f"Data updated successfully for {sormas_facility}")
-            else:
-                print(f"Error updating data for {sormas_facility}")
+            logger.info(f"Processed {sormas_facility} with {validated_facility} result: {postgresql_updated}")
 
 
 def process_district_gaps(df):
-    print("called process_district_gaps")
+    logger.info("***start called process_district_gaps****")
 
     # Extract sormas_facility and validated_facility columns
     if 'SORMAS District' not in df.columns or 'Validated District Name' not in df.columns:
@@ -615,35 +649,30 @@ def process_district_gaps(df):
     for index, row in df.iterrows():
         sormas_district = row['SORMAS District']
         validated_district = row['Validated District Name']
-        print("printing sormas_facility")
-        print(sormas_district)
+        logger.info("printing sormas_facility")
+        logger.info(sormas_district)
         if str(sormas_district).lower() == "nan" or isinstance(sormas_district, float) and math.isnan(
                 sormas_district):
-            print("entered")
+            logger.info("entered")
 
             # Perform the insertion, adjust as needed based on your data model
-            print("Inserting")
+            logger.info("Inserting")
             result = insert_new_district_record(row, validated_district)
-            if result:
-                print(f"Data created successfully for {validated_district}")
-            else:
-                print(f"Error creating data for {sormas_district}")
+            logger.info(f"Processed {validated_district} result: {result}")
+
 
         else:
 
-            print("Updating")
+            logger.info("Updating")
             # Update database with file data
             # Perform the update, adjust as needed based on your data model
-            postgresql_updated = update_district_name(sormas_district, validated_district)
+            postgresql_updated = update_district_name(row)
 
-            if postgresql_updated:
-                print(f"Data updated successfully for {sormas_district}")
-            else:
-                print(f"Error updating data for {sormas_district}")
+            logger.info(f"Processed {sormas_district} result: {postgresql_updated}")
 
 
 def process_sub_district_gaps(df):
-    print("called process_sub_district_gaps")
+    logger.info("****called process_sub_district_gaps entity_str****")
 
     # Extract sormas_sub-district and validated_sub-district columns
     if 'SORMAS Sub-District' not in df.columns or 'Validated Sub-district' not in df.columns:
@@ -657,31 +686,24 @@ def process_sub_district_gaps(df):
     for index, row in df.iterrows():
         sormas_sub_district = row['SORMAS Sub-District']
         validated_sub_district = row['Validated Sub-district']
-        print("printing sormas_sub-district")
-        print(sormas_sub_district)
+        logger.info("printing sormas_sub-district")
+        logger.info(sormas_sub_district)
         if str(sormas_sub_district).lower() == "nan" or isinstance(sormas_sub_district, float) and math.isnan(
                 sormas_sub_district):
-            print("entered")
+            logger.info("entered")
 
             # Perform the insertion, adjust as needed based on your data model
-            print("Inserting")
+            logger.info("Inserting")
             result = insert_new_sub_district_record(row, validated_sub_district)
-            if result:
-                print(f"Data created successfully for {validated_sub_district}")
-            else:
-                print(f"Error creating data for {sormas_sub_district}")
+            logger.info(f"Processed {validated_sub_district} result: {result}")
 
         else:
 
-            print("Updating")
+            logger.info("Updating")
             # Update database with file data
             # Perform the update, adjust as needed based on your data model
-            postgresql_updated = update_sub_district_name(sormas_sub_district, validated_sub_district)
-
-            if postgresql_updated:
-                print(f"Data updated successfully for {sormas_sub_district}")
-            else:
-                print(f"Error updating data for {sormas_sub_district}")
+            postgresql_updated = update_sub_district_name(row)
+            logger.info(f"Processed {sormas_sub_district} result: {postgresql_updated}")
 
 # @main.route('/update_data', methods=['GET', 'POST'])
 # def update_data_route():

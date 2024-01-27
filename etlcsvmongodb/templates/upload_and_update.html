@@ -7,7 +7,7 @@
 <body>
     <h1>Upload and Update Data</h1>
     <form action="/api/upload_and_update" method="post" enctype="multipart/form-data">
-        <p>Select a CSV or Excel file to upload. Ensure the file has columns 'sormas_facility' and 'validated_facility'.</p>
+        <p>Select a CSV or Excel file to upload. Ensure the file has columns 'Sormas_${entity}' and 'Validated_${entity}'.</p>
 
         <label for="data">Select a file to upload:</label>
         <input type="file" name="data" accept=".csv, .xlsx">

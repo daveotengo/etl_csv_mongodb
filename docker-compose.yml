@@ -1,0 +1,13 @@
+version: '3.3'
+
+services: # the different images that will be running as containers
+  web:
+    build: .
+    command: python run.py
+    volumes:
+      - .:/code
+    ports:
+      - "3000:3000"
+    network_mode: host
+
+

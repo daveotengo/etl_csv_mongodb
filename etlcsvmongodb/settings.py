@@ -9,8 +9,9 @@ MONGO_MAX_POOL_SIZE=50
 PSQL_HOST = 'localhost'
 PSQL_PORT = '5432'
 PSQL_USER = 'sormas_user'
-PSQL_PSW = 'sormas123'
-PSQL_DB_NAME = 'sormas_db'
+PSQL_PWD = 'sormas123'
+#PSQL_DB = 'sormas_db_1_74_3'
+PSQL_DB = 'sormas_db'
 
 #FILE UPLOAD
 UPLOADS_PATH = join(dirname(realpath(__file__)), './uploads/')

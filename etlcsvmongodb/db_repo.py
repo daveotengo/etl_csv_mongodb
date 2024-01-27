@@ -3,6 +3,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
+from etlcsvmongodb.logger_config import logger
 from etlcsvmongodb.settings import MONGO_HOST, MONGO_PORT, MONGO_MAX_POOL_SIZE
 
 try:
@@ -11,7 +12,7 @@ try:
     import pandas as pd
     import json
 except Exception as e:
-    print("Some Modules are Missing ")
+    logger.info("Some Modules are Missing ")
 
 
 class MongoDB(object):
@@ -29,13 +30,6 @@ class MongoDB(object):
 
 Base = declarative_base()
 
-# class PostgreSQLDB(object):
-#     def __init__(self, user=None, password=None, host=None, port=None, db=None ):
-#         self.engine = create_engine(
-#             f"postgresql://{user}:{password}@{host}:{port}/{db}"
-#         )
-#         Base.metadata.create_all(self.engine)
-#         self.Session = sessionmaker(bind=self.engine)
 
 
 class PostgreSQLDB(object):
@@ -60,7 +54,7 @@ class PostgreSQLDB(object):
         Base.metadata.create_all(self.engine)
 
     def create_session(self):
-        print("creating session for psql")
+        logger.info("creating session for psql")
         Session = sessionmaker(bind=self.engine)
         return Session()
 
